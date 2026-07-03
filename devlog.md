@@ -1,5 +1,26 @@
 # Devlog
 
+## 2026-07-03 — Session close / project state
+
+Stopping the build here. **Where it stands:** vertical slice through Louvain communities is
+working end-to-end on **250 real albums** (100% tag coverage, 98% years, 14 genre communities).
+Roadmap 1, 2, 5 done; 3 stopped at 250 by choice; 4 (genre co-occurrence embedding), 6 (Elo
+scoring), 7 (playlists) not started. Docs current: ADR-001..009, `music-project.md` Decisions Log
+updated (008/009 added), ADR-003 amended with the scaling-era tag-filtering refinements, ADR-007
+noted with the source-title-match class + prune behavior.
+
+**To resume:** `python run.py` (all cached; ~instant) → open `frontend/index.html` via
+`python -m http.server` in `frontend/`. Run `python -m tools.audit` after any `albums.csv` change.
+
+**Two open threads (both decisions, not blockers):**
+1. **Default weighting** — communities read as *eras* at the 50/50 default; set genre-leaning
+   (`config.DEFAULTS`, e.g. w_genre 0.7 / w_year 0.3) if the first-load view should be genres.
+2. **Elo scoring** (roadmap #6) — the last un-grilled design branch; grill it before building
+   (pair selection, K-factor, cold start, sequencing) per the original design-mode approach.
+
+Non-code: local static server was left running on :8777 during the session — harmless, dies with
+the session.
+
 ## 2026-07-03 — Scaled to 250 albums (roadmap #3 — stopping point)
 
 - **Done:** `data/albums.csv` 149 → **250** (+101 canonical albums: new territory — grunge, britpop, new-wave/synthpop, trip-hop, industrial, emo/midwest, reggae, art-pop — plus deepened hip-hop/jazz/electronic/metal/soul). Full run: **250/250 ok, 0 failed, 100% tag coverage, 98% years resolved** (6 unresolved), 11,266 edges. At genre-weighted kNN the graph resolves into **14 clean genre communities** (alt-rock, rap, electronic, shoegaze, jazz, folk, ambient, post-punk, post-rock, black metal, indie, idm, prog, soul). Neighbor spot-checks all defensible (Nirvana→In Utero/Alice in Chains; Portishead→Tricky/Massive Attack; Björk→Vespertine; Bob Marley→Burning Spear 0.995; American Football→Battles/Mineral/Slint).

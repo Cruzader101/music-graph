@@ -37,3 +37,26 @@ data-audit-agent exists to catch. On a curated set the long tail of niche tags i
   (small, bounded).
 - **Doc debt paid:** `music-project.md` updated to reference the blacklist.
 - data-audit-agent's "junk tag leakage" metric becomes the feedback loop that grows the blacklist.
+
+## Amendment (2026-07-03) — filtering refinements from scaling 40 → 250
+
+Scaling surfaced that a plain-text blacklist alone is the wrong tool for *unbounded junk
+families*. The filtering in `pipeline/clean.py` was extended (still blacklist-first in spirit —
+deny known junk, allow everything else):
+
+- **Tag normalization before filtering:** hyphen/underscore/slash → space, so `hip-hop` ≡
+  `hip hop` and `post-rock` ≡ `post rock`. Last.fm ships both variants; left split they fragment
+  a cluster's cosine dimensions *and* its community color. (Affects `sim_genre`, so noted here
+  rather than in ADR-007, which governs the album *key*, not tag strings.)
+- **Pattern-killed junk families** (regex, not enumeration): `^best…` (best of YEAR / best albums
+  ever / best new reissues), `…albums you must hear…`, trailing `… records` (labels), `vinyl`,
+  and any tag > 45 chars (personal-narrative tags). Bare years/decades already handled.
+- **The blacklist file now targets only fixed-string junk** (specific labels, `where is my bong`,
+  rating words); the *families* live as patterns. `tools/audit.py` (the built coverage audit,
+  roadmap #2) is the feedback loop: its junk-leakage report is where new patterns/entries come
+  from. At 250 albums this drove leakage to a single legitimate borderline tag (`field
+  recordings`).
+
+Sibling class (identity, not filtering): several albums returned **junk-only or empty** top-tags
+because the source *title/artist string missed Last.fm's canonical page* (Kendrick, Sly, Eno, GZA,
+Art Blakey, Smashing Pumpkins). Fix is a curated title in `data/albums.csv`; see ADR-007.

@@ -85,3 +85,5 @@ Architecture decisions get ADRs in `docs/adr/`. Current standing decisions:
 - **ADR-005**: genre metric strategy — dual metric (cosine+jaccard) × dual weighting (raw+IDF), corpus-aware IDF from Last.fm global tag frequencies
 - **ADR-006**: conservative MusicBrainz year resolution — verify-or-flag, earliest qualifying release date, missing over wrong
 - **ADR-007**: album identity — normalized `(artist, album)` key with reissue suffixes stripped, mbid as merge aid
+- **ADR-008**: export schema is the single frontend↔backend contract — self-describing `meta`+`nodes`+`edges` JSON, documented in `docs/export-schema.md`
+- **ADR-009**: Louvain community detection runs **client-side, live** on the drawn weighted graph (not baked in Python) — coloring tracks the current weights; `Color by: community | tag` toggle
