@@ -1,5 +1,15 @@
 # Devlog
 
+## 2026-07-02 — Scaled to 149 albums + coverage-audit tooling (roadmap #2, #3)
+
+- **Done:** Grew `data/albums.csv` 40 → 149 (canonical, richly-tagged; deepened existing clusters and added post-punk / indie-alt / classic-prog / soul-funk / thrash-doom-death metal / more jazz-electronic, with deliberate bridges). Full run: **149/149 ok, 0 failed, 100% tag coverage (≥2 tags), 97% years resolved** (4 unresolved, all genuinely hard for MB's conservative match), 3854 edges. Neighbor spot-checks on the new clusters all defensible (Joy Division→Television/Cure/Wire; Marvin Gaye→Badu/Stevie/D'Angelo/Sly; Metallica→Slayer/Sabbath→Bathory; Pink Floyd→King Crimson/Tool).
+- **Built `tools/audit.py`** (roadmap #2): fetch success, tag coverage %, sparse (<2 tag) albums, year resolution, and junk-tag leakage candidates → feeds the ADR-003 blacklist loop. Ran it, acted on it:
+  - Junk *families* now killed by patterns in `clean.py` (not enumeration): `best of YEAR` / `best albums ever`, `…albums you must hear…`, and tags >45 chars (personal-narrative junk). Blacklisted `1001 albums you must hear before you die` (df=20), `where is my bong`, `perfect`.
+  - Two title-match failures fixed: **Sly** needed `Sly & The Family Stone` (ampersand → funk/soul tags, was 0), **Eno** needed `Ambient 1: Music for Airports` (colon → ambient/electronic/minimalism, was 1 tag). Result: 0 sparse albums.
+  - `fetch.py` now **prunes** albums removed from the CSV (so the Sly title change didn't orphan a node) — CSV is source of truth; not a fetch-failure drop.
+- **Perf:** O(n²) at 149 = ~11k pairs, trivial; cosine matmul + Louvain both instant. Nothing to optimize.
+- **Next:** default-weighting decision still open (era vs genre communities); scale further toward the ≤5k target, or open Elo scoring.
+
 ## 2026-07-02 — Louvain community coloring (client-side, live)
 
 - **Done:** Roadmap #5. Own dependency-free multi-level Louvain (`frontend/louvain.js`), run client-side on the currently-drawn weighted graph and recomputed on control changes (ADR-009). Node color now = community (stable rank-based palette), with a `Color by: community | tag` toggle; legend labels each community by its majority dominant-tag + size. Collapses the old 20-color dominant-tag fragmentation to a handful of communities.

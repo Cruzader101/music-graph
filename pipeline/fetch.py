@@ -81,6 +81,18 @@ def main() -> None:
         except Exception:  # one album must never abort the batch
             log.exception("unexpected error on %s — %s", artist, album)
 
+    # Prune albums removed from albums.csv (keeps the CSV the source of truth,
+    # e.g. after a title fix changes a node id). Not a fetch-failure drop.
+    current_ids = {album_id(a, b) for a, b in albums}
+    stale = [r["id"] for r in conn.execute("SELECT id FROM albums").fetchall()
+             if r["id"] not in current_ids]
+    for sid in stale:
+        conn.execute("DELETE FROM album_tags WHERE album_id = ?", (sid,))
+        conn.execute("DELETE FROM albums WHERE id = ?", (sid,))
+    if stale:
+        log.info("pruned %d album(s) no longer in albums.csv", len(stale))
+    conn.commit()
+
     ok = conn.execute("SELECT COUNT(*) c FROM albums WHERE status='ok'").fetchone()["c"]
     failed = conn.execute("SELECT COUNT(*) c FROM albums WHERE status='failed'").fetchone()["c"]
     unresolved = conn.execute(

@@ -28,10 +28,10 @@ all time favourites
 music i like
 spotify
 under 2000 listeners
-best of 2010
-best of 2012
-best albums of 2010
-best albums of 2012
+1001 albums you must hear before you die
+where is my bong
+# ("best of YEAR" / "best albums ever" / long narrative tags handled by
+#  patterns in clean.py, not enumerated here — see _JUNK_PATTERNS)
 
 # Record labels (not genres — leak in as high-weight junk; ADR-003 case)
 interscope
@@ -60,3 +60,4 @@ classic
 good
 chill
 catchy
+perfect
