@@ -1,0 +1,47 @@
+# Genre-tag blacklist (ADR-003). One tag per line, case-insensitive, matched
+# after normalization (lowercase, trimmed). A tag counts UNLESS listed here.
+# Targets rare/idiosyncratic junk that IDF would otherwise amplify — NOT common
+# generic tags (rock, indie); IDF suppresses those. Grow this from the
+# data-audit-agent's "junk tag leakage" metric.
+#
+# Lines starting with '#' and blank lines are ignored.
+
+# Personal-collection / listening-habit tags
+seen live
+albums i own
+albums i own on vinyl
+vinyl
+own it
+owned
+my vinyl
+my music
+my albums
+favourite albums
+favorite albums
+favourites
+favorites
+favs
+best albums
+best of
+albums i love
+all time favourites
+music i like
+spotify
+under 2000 listeners
+
+# Non-genre descriptors
+male vocalists
+female vocalists
+female vocalist
+male vocalist
+beautiful
+awesome
+cool
+love
+amazing
+epic
+masterpiece
+classic
+good
+chill
+catchy

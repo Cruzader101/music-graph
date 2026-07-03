@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Music Graph</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="vendor/d3.v7.min.js"></script>
+</head>
+<body>
+  <aside id="panel">
+    <h1>Music Graph</h1>
+    <p class="sub" id="meta-line">loading…</p>
+
+    <section>
+      <h2>Axis weights</h2>
+      <label>Genre <output id="wg-out">0.50</output></label>
+      <input type="range" id="w_genre" min="0" max="1" step="0.01" value="0.5" />
+      <label>Year <output id="wy-out">0.50</output></label>
+      <input type="range" id="w_year" min="0" max="1" step="0.01" value="0.5" />
+    </section>
+
+    <section>
+      <h2>Genre metric</h2>
+      <div class="radios" id="metric">
+        <label><input type="radio" name="metric" value="cosine" checked /> cosine</label>
+        <label><input type="radio" name="metric" value="jaccard" /> jaccard</label>
+      </div>
+      <h2>Weighting</h2>
+      <div class="radios" id="weighting">
+        <label><input type="radio" name="weighting" value="raw" checked /> raw</label>
+        <label><input type="radio" name="weighting" value="idf" /> idf</label>
+      </div>
+    </section>
+
+    <section>
+      <h2>Draw mode</h2>
+      <div class="radios" id="mode">
+        <label><input type="radio" name="mode" value="threshold" checked /> threshold</label>
+        <label><input type="radio" name="mode" value="knn" /> kNN</label>
+        <label><input type="radio" name="mode" value="mutual_knn" /> mutual kNN</label>
+      </div>
+      <label>Threshold <output id="th-out">0.35</output></label>
+      <input type="range" id="threshold" min="0" max="1" step="0.01" value="0.35" />
+      <label>k <output id="k-out">8</output></label>
+      <input type="range" id="k" min="1" max="15" step="1" value="8" />
+    </section>
+
+    <section>
+      <h2 class="stat"><span id="edge-count">0</span> edges shown</h2>
+      <p class="hint">scroll to zoom · drag nodes · hover to focus</p>
+    </section>
+
+    <section id="legend-wrap">
+      <h2>Clusters (dominant tag)</h2>
+      <div id="legend"></div>
+    </section>
+  </aside>
+
+  <main id="stage"><svg id="graph"></svg></main>
+  <script src="graph.js"></script>
+</body>
+</html>

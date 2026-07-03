@@ -1,0 +1,21 @@
+# Secrets
+.env
+
+# Data / cache (never in git — music-project.md)
+cache.db
+cache.db-journal
+cache.db-wal
+cache.db-shm
+data/derived/
+frontend/graph.json
+
+# Logs
+logs/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Vendored libs are tracked (offline-safe frontend) — do not ignore frontend/vendor/
