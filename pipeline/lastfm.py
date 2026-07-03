@@ -58,8 +58,11 @@ def get_album_info(conn, artist: str, album: str) -> AlbumInfo | None:
         return None
     a = data["album"]
     mbid = a.get("mbid") or None
-    year = _extract_year(a)
-    return AlbumInfo(artist=a.get("artist", artist), album=a.get("name", album), mbid=mbid, year=year)
+    # Last.fm getInfo has NO reliable release-year field: the deprecated
+    # `releasedate` is empty, and `wiki.published` is the wiki EDIT date (it
+    # returns e.g. 2026 for a 1993 album). Never guess a year here — defer
+    # entirely to MusicBrainz (ADR-001/006). year stays None.
+    return AlbumInfo(artist=a.get("artist", artist), album=a.get("name", album), mbid=mbid, year=None)
 
 
 def get_tag_global(conn, tag: str) -> tuple[int, int] | None:
@@ -81,12 +84,3 @@ def get_tag_global(conn, tag: str) -> tuple[int, int] | None:
     except (TypeError, ValueError):
         return None
     return reach, taggings
-
-
-def _extract_year(album_obj: dict) -> int | None:
-    """Last.fm release dates are spotty; pull a 4-digit year if the wiki has one."""
-    wiki = album_obj.get("wiki") or {}
-    published = wiki.get("published") or ""
-    import re
-    m = re.search(r"(19|20)\d{2}", published)
-    return int(m.group(0)) if m else None

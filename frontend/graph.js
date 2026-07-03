@@ -196,10 +196,13 @@ fetch("graph.json").then(r => r.json()).then(graph => {
     .attr("class", "label").text(n => `${n.artist} — ${n.album}`);
 
   sim = d3.forceSimulation(nodes)
-    .force("link", d3.forceLink().id(n => n.id).distance(l => 40 + 90 * (1 - l.score)).strength(l => 0.2 + 0.8 * l.score))
-    .force("charge", d3.forceManyBody().strength(-160))
+    // Weak edges push far, strong edges pull tight → communities separate.
+    .force("link", d3.forceLink().id(n => n.id).distance(l => 45 + 190 * (1 - l.score)).strength(l => 0.08 + 0.9 * l.score))
+    .force("charge", d3.forceManyBody().strength(-420).distanceMax(700))
     .force("center", d3.forceCenter(W / 2, H / 2))
-    .force("collide", d3.forceCollide().radius(n => 8 + Math.sqrt(n.degree)))
+    .force("x", d3.forceX(W / 2).strength(0.04))
+    .force("y", d3.forceY(H / 2).strength(0.04))
+    .force("collide", d3.forceCollide().radius(n => 14 + Math.sqrt(n.degree)))
     .on("tick", ticked);
 
   const zoom = d3.zoom().scaleExtent([0.2, 6]).on("zoom", ev => {

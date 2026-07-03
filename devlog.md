@@ -1,5 +1,22 @@
 # Devlog
 
+## 2026-07-02 — Vertical slice PASSES end-to-end on real data
+
+- **Done:** Ran the full pipeline on the live Last.fm/MusicBrainz APIs over the 40-album seed set. `fetch` ok=40 failed=0, years via MusicBrainz (2 unresolved — Bill Evans live LP + GY!BE — correctly flagged, not guessed, per ADR-006). 134 tags, 407 candidate edges, `frontend/graph.json` rendered in Chrome headless.
+- **Acceptance:** Check 1 (neighbor table) passes outright — all 8 seeds musically defensible, no junk neighbors (see `docs/acceptance-thin-slice.md`, table filled). Check 2 (visual) passes on spatial structure; color is fragmented because interim node color = dominant tag and one genre spans several tags — Louvain (roadmap #5) is the fix, not a metric bug.
+- **Bugs caught + fixed mid-run:** (1) Last.fm `getInfo` `wiki.published` is the wiki EDIT date, not release date — it stamped Souvlaki as 2026; removed it, MusicBrainz is now the sole year source. (2) Kendrick's `good kid m.A.A.d city` (no comma) returned only label tags → isolated node; fixed title to `good kid, m.A.A.d city` (same normalized id). (3) Added record labels + "best of YEAR" to the blacklist (ADR-003 grow-as-spotted). (4) Normalized hyphen/space in tags so `hip-hop`≡`hip hop`, `post-rock`≡`post rock` (merges split cosine dims + colors).
+- **Frontend:** tuned d3-force (charge -420, weak edges push far) so communities separate instead of hairballing; still connected at default threshold 0.35 (real cross-genre similarity) — kNN mode / higher threshold cleans it up.
+- **Known/next:** interim color granularity → build Louvain communities (roadmap #5). Brian Eno — Ambient 1 has only 1 surviving tag (sparse; data-audit candidate). Then scale the album set past 40. idf/jaccard/kNN/mutual are all live toggles now (computed for real), raw-cosine+threshold stays default.
+
+## 2026-07-02 — Vertical slice built (offline half proven; fetch awaits key)
+
+- **Done:** Scaffolded the whole pipeline with hard stage boundaries (music-project.md): `config.py` (all knobs/paths/thresholds), `db/schema.sql` (raw_responses, albums, album_tags, tag_global, edges), and stages `fetch → clean → features → similarity → export` under `pipeline/`, each runnable alone + orchestrated by `run.py`. One HTTP wrapper (`http_client.py`) does rate-limit + retry/backoff + verbatim cache + `logs/fetch_errors.jsonl`. d3-force frontend (`frontend/`, d3 vendored offline) with live weighted-sum, metric/weighting/mode toggles, threshold+k sliders, zoom-adaptive label thinning.
+- **Proven:** `tools/smoke.py` seeds synthetic 3-cluster data into a temp db and runs features→similarity→export: schema valid, intra-cluster cosine 1.000 vs inter 0.000, blackgaze bridge links both clusters, null-year path exercised. `tests/test_identity.py` (ADR-007 dedup) 6/6 green. `graph.js` node-syntax clean.
+- **Decisions honored:** raw-cosine is the live acceptance axis; idf/jaccard computed too (cheap, gives Cruz the A/B toggles) but raw-cosine is the default. Export contract = floor OR top-15 (ADR-004) implemented in similarity stage. Windows console forced UTF-8 (␟ separator).
+- **Seed set:** `data/albums.csv` — ~40 hand-picked albums with deliberate bridges (blackgaze shoegaze↔black-metal; post-rock shoegaze↔ambient) for real acceptance ground truth.
+- **Broken/unstarted:** fetch + clean never hit a live API yet — **need the Last.fm key in `.env`** (`.env.example` present). `frontend/graph.json` is a synthetic placeholder until the real run overwrites it. No screenshot yet (frontend needs a static server + real data). Repo git-initialized, scaffold committed on `main`.
+- **Next step:** Cruz pastes `LASTFM_API_KEY` → `python run.py` (real ~40-album fetch) → run `tools/neighbors.py` for acceptance Check 1 + serve `frontend/` and eyeball Check 2. Then flip on the wired-but-dark toggles / fill acceptance specifics.
+
 ## 2026-07-02 — Design grill: similarity/graph core locked
 
 - **Done:** Grilled the full fetch→similarity→graph trunk to shared understanding. 11 decisions locked and captured as ADR-001..007 (`docs/adr/`); reversed the whitelist→blacklist standing decision; updated `music-project.md` to match.

@@ -28,6 +28,21 @@ all time favourites
 music i like
 spotify
 under 2000 listeners
+best of 2010
+best of 2012
+best albums of 2010
+best albums of 2012
+
+# Record labels (not genres — leak in as high-weight junk; ADR-003 case)
+interscope
+aftermath
+stones throw
+def jam
+sub pop
+4ad
+warp
+matador
+rough trade
 
 # Non-genre descriptors
 male vocalists

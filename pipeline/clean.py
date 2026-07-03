@@ -30,7 +30,11 @@ def load_blacklist() -> set[str]:
 
 
 def clean_tag(name: str) -> str:
-    return re.sub(r"\s+", " ", name.strip().lower())
+    # Normalize hyphen/underscore/slash to space so "hip-hop" ≡ "hip hop" and
+    # "post-rock" ≡ "post rock" — Last.fm returns both variants as distinct
+    # tags, which otherwise split a cluster's color AND its cosine dimensions.
+    name = re.sub(r"[-_/]+", " ", name.strip().lower())
+    return re.sub(r"\s+", " ", name).strip()
 
 
 def is_junk(tag: str, blacklist: set[str]) -> bool:

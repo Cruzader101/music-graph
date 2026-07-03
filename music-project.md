@@ -67,7 +67,7 @@ TBD — either Cruz's library export or a seeded canonical list. Target scale as
 
 **First milestone — vertical slice (one-shot target):** ~100 albums end-to-end: fetch → clean → similarity v1 → graph JSON → rendered d3 graph with weight sliders. Everything below is iteration on that skeleton.
 
-1. ☐ Vertical slice (fetchers + cache, whitelist cleaning, Jaccard genre + year kernel, JSON export, d3 frontend)
+1. ☑ Vertical slice (fetchers + cache, blacklist cleaning, cosine+jaccard genre + year kernel, JSON export, d3 frontend) — PASSES on 40-album seed (2026-07-02); see devlog + acceptance-thin-slice.md
 2. ☐ Coverage audit tooling (tag coverage %, junk leakage, missing years)
 3. ☐ Scale album set toward full target
 4. ☐ Genre co-occurrence embedding (similarity v2)
