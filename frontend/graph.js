@@ -22,10 +22,14 @@ window.addEventListener("resize", () => { size(); sim && sim.alpha(0.3).restart(
 const controls = {
   w_genre: 0.5, w_year: 0.5,
   metric: "cosine", weighting: "raw", mode: "threshold",
-  threshold: 0.35, k: 8,
+  threshold: 0.35, k: 8, colorby: "community",
 };
 
-let nodes = [], edges = [], color = null, sim = null;
+// Stable categorical palette for communities (indexed by stable rank).
+const COMM_PALETTE = d3.schemeCategory10.concat(d3.schemeSet3, d3.schemePaired);
+
+let nodes = [], edges = [], tagColor = null, sim = null;
+let communityMeta = new Map();  // communityId -> {rank, color, label, size}
 let linkSel, nodeSel, labelSel;
 let zoomK = 1;
 let focus = null; // hovered node id
@@ -73,6 +77,10 @@ function render() {
   const active = activeEdges();
   document.getElementById("edge-count").textContent = active.length;
   const links = active.map(({ e, s }) => ({ source: e.source, target: e.target, score: s }));
+
+  recomputeCommunities(links);   // live Louvain on the currently-drawn weighted graph (ADR-009)
+  applyNodeColors();
+  buildLegend();
 
   linkSel = gLinks.selectAll("line").data(links, d =>
     `${d.source.id ?? d.source}|${d.target.id ?? d.target}`);
@@ -170,11 +178,10 @@ fetch("graph.json").then(r => r.json()).then(graph => {
   document.getElementById("meta-line").textContent =
     `${graph.meta.album_count} albums · ${edges.length} candidate edges · v${graph.meta.pipeline_version}`;
 
-  // color by dominant tag
+  // tag color scale (used when "color by: tag")
   const tags = Array.from(new Set(nodes.map(n => n.dominant_tag))).sort();
   const palette = d3.quantize(t => d3.interpolateSinebow(t * 0.92), Math.max(tags.length, 2));
-  color = d3.scaleOrdinal(tags, palette);
-  buildLegend(tags);
+  tagColor = d3.scaleOrdinal(tags, palette);
 
   // precompute degree from full candidate edge set (for label priority)
   const deg = new Map(nodes.map(n => [n.id, 0]));
@@ -184,7 +191,7 @@ fetch("graph.json").then(r => r.json()).then(graph => {
   nodeSel = gNodes.selectAll("g").data(nodes, n => n.id).enter().append("g").attr("class", "node");
   nodeSel.append("circle")
     .attr("r", n => 5 + Math.sqrt(n.degree))
-    .attr("fill", n => color(n.dominant_tag))
+    .attr("fill", "#888")   // recolored by applyNodeColors() on first render
     .on("mouseenter", (ev, n) => { focus = n.id; updateFocusStyles(); })
     .on("mouseleave", () => { focus = null; updateFocusStyles(); })
     .call(d3.drag()
@@ -247,13 +254,70 @@ bindRange("k", "k", "k-out", v => v);
   document.querySelectorAll(`input[name=${name}]`).forEach(r =>
     r.addEventListener("change", e => { controls[name] = e.target.value; window.render && window.render(); })));
 
-function buildLegend(tags) {
-  const el = document.getElementById("legend");
-  el.innerHTML = "";
-  tags.forEach(t => {
-    const row = document.createElement("div"); row.className = "legend-row";
-    const sw = document.createElement("span"); sw.className = "legend-swatch"; sw.style.background = color(t);
-    const label = document.createElement("span"); label.textContent = t;
-    row.append(sw, label); el.append(row);
+// Color-by toggle: only recolor + relabel legend — no recompute / no layout restart.
+document.querySelectorAll("input[name=colorby]").forEach(r =>
+  r.addEventListener("change", e => { controls.colorby = e.target.value; applyNodeColors(); buildLegend(); }));
+
+// --- Communities (live Louvain) -------------------------------------------
+function recomputeCommunities(links) {
+  const llinks = links.map(l => ({
+    source: l.source.id ?? l.source, target: l.target.id ?? l.target, weight: l.score,
+  }));
+  const comm = louvain(nodes.map(n => n.id), llinks);   // id -> raw community index
+
+  const byComm = new Map();
+  nodes.forEach(n => {
+    const c = comm.get(n.id);
+    n.community = c;
+    if (!byComm.has(c)) byComm.set(c, []);
+    byComm.get(c).push(n);
   });
+
+  // Stable ranking: order communities by their smallest member id, so a cluster
+  // keeps its color across slider tweaks even though Louvain's raw labels churn.
+  const list = [...byComm.entries()].map(([c, members]) => ({
+    c, members, key: members.map(m => m.id).sort()[0], size: members.length,
+  })).sort((a, b) => a.key < b.key ? -1 : 1);
+
+  communityMeta = new Map();
+  list.forEach((cm, rank) => {
+    const counts = {};
+    cm.members.forEach(m => { counts[m.dominant_tag] = (counts[m.dominant_tag] || 0) + 1; });
+    const label = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];  // majority tag
+    communityMeta.set(cm.c, { rank, color: COMM_PALETTE[rank % COMM_PALETTE.length], label, size: cm.size });
+  });
+  document.getElementById("comm-count").textContent = list.length;
+}
+
+function nodeFill(n) {
+  if (controls.colorby === "community") {
+    const meta = communityMeta.get(n.community);
+    return meta ? meta.color : "#888";
+  }
+  return tagColor(n.dominant_tag);
+}
+
+function applyNodeColors() {
+  if (nodeSel) nodeSel.select("circle").attr("fill", nodeFill);
+}
+
+function addLegendRow(el, swatch, text) {
+  const row = document.createElement("div"); row.className = "legend-row";
+  const sw = document.createElement("span"); sw.className = "legend-swatch"; sw.style.background = swatch;
+  const label = document.createElement("span"); label.textContent = text;
+  row.append(sw, label); el.append(row);
+}
+
+function buildLegend() {
+  const el = document.getElementById("legend");
+  const title = document.getElementById("legend-title");
+  el.innerHTML = "";
+  if (controls.colorby === "community") {
+    title.textContent = "Communities (majority tag)";
+    [...communityMeta.values()].sort((a, b) => a.rank - b.rank)
+      .forEach(m => addLegendRow(el, m.color, `${m.label} · ${m.size}`));
+  } else {
+    title.textContent = "Dominant tags";
+    tagColor.domain().forEach(t => addLegendRow(el, tagColor(t), t));
+  }
 }

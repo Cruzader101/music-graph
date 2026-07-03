@@ -1,5 +1,12 @@
 # Devlog
 
+## 2026-07-02 — Louvain community coloring (client-side, live)
+
+- **Done:** Roadmap #5. Own dependency-free multi-level Louvain (`frontend/louvain.js`), run client-side on the currently-drawn weighted graph and recomputed on control changes (ADR-009). Node color now = community (stable rank-based palette), with a `Color by: community | tag` toggle; legend labels each community by its majority dominant-tag + size. Collapses the old 20-color dominant-tag fragmentation to a handful of communities.
+- **Validated:** `tools/louvain_check.js` (node) mirrors the frontend scoring. Genre-only weighting recovers textbook communities — shoegaze / black metal / hip-hop / jazz / folk / ambient / post-rock. Rendered + screenshotted; JS syntax clean.
+- **Key finding:** communities track the live weights. At the **50/50 genre/year default they're era-driven** (90s vs 2000s, genre-mixed) because the year kernel (σ=5) densely links same-era albums; at year→0 they're clean genres. This is the live-Louvain payoff, but it means the default view's colors read as eras, not genres. **Open question for Cruz:** should default weighting lean genre (e.g. w_genre 0.7 / w_year 0.3), or drop σ_year? Left on the slider, not changed unilaterally (would touch a standing default).
+- **Next:** decide default weighting; then scale the album set, or start the Elo scoring branch.
+
 ## 2026-07-02 — Vertical slice PASSES end-to-end on real data
 
 - **Done:** Ran the full pipeline on the live Last.fm/MusicBrainz APIs over the 40-album seed set. `fetch` ok=40 failed=0, years via MusicBrainz (2 unresolved — Bill Evans live LP + GY!BE — correctly flagged, not guessed, per ADR-006). 134 tags, 407 candidate edges, `frontend/graph.json` rendered in Chrome headless.

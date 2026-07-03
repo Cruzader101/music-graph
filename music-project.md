@@ -71,7 +71,7 @@ TBD — either Cruz's library export or a seeded canonical list. Target scale as
 2. ☐ Coverage audit tooling (tag coverage %, junk leakage, missing years)
 3. ☐ Scale album set toward full target
 4. ☐ Genre co-occurrence embedding (similarity v2)
-5. ☐ Louvain communities + coloring
+5. ☑ Louvain communities + coloring — client-side live (ADR-009); done 2026-07-02
 6. ☐ Scoring system: comparison history schema + Elo updates + pair selection, node size/brightness in graph
 7. ☐ Playlists (paths, walks) — later: bias walks by score
 

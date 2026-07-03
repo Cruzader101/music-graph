@@ -47,17 +47,26 @@
     </section>
 
     <section>
-      <h2 class="stat"><span id="edge-count">0</span> edges shown</h2>
+      <h2>Color by</h2>
+      <div class="radios" id="colorby">
+        <label><input type="radio" name="colorby" value="community" checked /> community</label>
+        <label><input type="radio" name="colorby" value="tag" /> tag</label>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="stat"><span id="edge-count">0</span> edges · <span id="comm-count">0</span> communities</h2>
       <p class="hint">scroll to zoom · drag nodes · hover to focus</p>
     </section>
 
     <section id="legend-wrap">
-      <h2>Clusters (dominant tag)</h2>
+      <h2 id="legend-title">Communities</h2>
       <div id="legend"></div>
     </section>
   </aside>
 
   <main id="stage"><svg id="graph"></svg></main>
+  <script src="louvain.js"></script>
   <script src="graph.js"></script>
 </body>
 </html>
