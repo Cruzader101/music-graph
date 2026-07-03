@@ -22,9 +22,10 @@ _DECADE_RE = re.compile(r"^\s*(?:19|20)?\d{2}s?\s*$")  # 90s, 1990s, 1998, 98
 # Junk tag *families* — patterns beat enumerating every year (ADR-003). Grown
 # from the audit's junk-leakage report (tools/audit.py).
 _JUNK_PATTERNS = (
-    re.compile(r"^(?:the )?best (?:of|album|albums)\b"),   # best of 2013 / best albums ever
-    re.compile(r"\balbums you must hear\b"),               # 1001 albums you must hear before you die
-    re.compile(r"^the best\b"),
+    re.compile(r"^(?:the )?best\b"),          # best of 2013 / best albums ever / best new reissues
+    re.compile(r"\balbums you must hear\b"),  # 1001 albums you must hear before you die
+    re.compile(r"\brecords$"),                # record labels: hi records, merge records, ...
+    re.compile(r"\bvinyl\b"),                 # vinyl / have on vinyl / my vinyl
 )
 _MAX_TAG_LEN = 45  # personal-narrative tags ("albums to listen to while lying in bed…")
 

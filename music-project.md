@@ -69,7 +69,7 @@ TBD — either Cruz's library export or a seeded canonical list. Target scale as
 
 1. ☑ Vertical slice (fetchers + cache, blacklist cleaning, cosine+jaccard genre + year kernel, JSON export, d3 frontend) — PASSES on 40-album seed (2026-07-02); see devlog + acceptance-thin-slice.md
 2. ☑ Coverage audit tooling (`tools/audit.py`: tag coverage %, junk leakage, missing years) — done 2026-07-02
-3. ◐ Scale album set toward full target — at 149/≤5k (2026-07-02); 100% tag coverage, 97% years
+3. ☑ Scale album set — stopped at 250 for this phase (2026-07-03); 100% tag coverage, 98% years, 14 genre communities. Architecture headroom to ≤5k unused but proven trivial (O(n²)≈31k pairs instant)
 4. ☐ Genre co-occurrence embedding (similarity v2)
 5. ☑ Louvain communities + coloring — client-side live (ADR-009); done 2026-07-02
 6. ☐ Scoring system: comparison history schema + Elo updates + pair selection, node size/brightness in graph

@@ -174,6 +174,14 @@ fetch("graph.json").then(r => r.json()).then(graph => {
   controls.metric = graph.meta.genre_metric_default;
   controls.weighting = graph.meta.genre_weighting_default;
   controls.mode = graph.meta.draw_mode_default;
+
+  // URL params override defaults for shareable views, e.g.
+  // ?w_genre=0.8&w_year=0.2&mode=knn&colorby=community
+  const params = new URLSearchParams(location.search);
+  for (const key of ["w_genre", "w_year", "threshold", "k"])
+    if (params.has(key)) controls[key] = +params.get(key);
+  for (const key of ["metric", "weighting", "mode", "colorby"])
+    if (params.has(key)) controls[key] = params.get(key);
   syncControlsToUI();
   document.getElementById("meta-line").textContent =
     `${graph.meta.album_count} albums · ${edges.length} candidate edges · v${graph.meta.pipeline_version}`;

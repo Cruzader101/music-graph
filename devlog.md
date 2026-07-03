@@ -1,5 +1,13 @@
 # Devlog
 
+## 2026-07-03 — Scaled to 250 albums (roadmap #3 — stopping point)
+
+- **Done:** `data/albums.csv` 149 → **250** (+101 canonical albums: new territory — grunge, britpop, new-wave/synthpop, trip-hop, industrial, emo/midwest, reggae, art-pop — plus deepened hip-hop/jazz/electronic/metal/soul). Full run: **250/250 ok, 0 failed, 100% tag coverage, 98% years resolved** (6 unresolved), 11,266 edges. At genre-weighted kNN the graph resolves into **14 clean genre communities** (alt-rock, rap, electronic, shoegaze, jazz, folk, ambient, post-punk, post-rock, black metal, indie, idm, prog, soul). Neighbor spot-checks all defensible (Nirvana→In Utero/Alice in Chains; Portishead→Tricky/Massive Attack; Björk→Vespertine; Bob Marley→Burning Spear 0.995; American Football→Battles/Mineral/Slint).
+- **Audit-driven fixes** (`tools/audit.py` again earned its keep): 3 title-match failures fixed (Art Blakey drop "& the Jazz Messengers"; GZA → GZA/Genius; Smashing Pumpkins → "The") → 0 sparse. Junk patterns in `clean.py` broadened to `^best…`, `…records$` (labels), `vinyl` → junk leakage down to 1 (legit `field recordings`).
+- **Frontend:** added URL-param overrides for shareable views (`?w_genre=0.8&w_year=0.2&mode=knn&colorby=community`) — also how the 14-community view was captured.
+- **Perf:** O(n²) at 250 = ~31k pairs; cosine matmul + Louvain still instant. No optimization needed.
+- **Album-set scaling stops here at 250** (Cruz's call for this phase). Remaining open: default-weighting decision (era vs genre on load); Elo scoring branch (still un-grilled).
+
 ## 2026-07-02 — Scaled to 149 albums + coverage-audit tooling (roadmap #2, #3)
 
 - **Done:** Grew `data/albums.csv` 40 → 149 (canonical, richly-tagged; deepened existing clusters and added post-punk / indie-alt / classic-prog / soul-funk / thrash-doom-death metal / more jazz-electronic, with deliberate bridges). Full run: **149/149 ok, 0 failed, 100% tag coverage (≥2 tags), 97% years resolved** (4 unresolved, all genuinely hard for MB's conservative match), 3854 edges. Neighbor spot-checks on the new clusters all defensible (Joy Division→Television/Cure/Wire; Marvin Gaye→Badu/Stevie/D'Angelo/Sly; Metallica→Slayer/Sabbath→Bathory; Pink Floyd→King Crimson/Tool).
