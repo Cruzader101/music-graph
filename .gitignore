@@ -12,6 +12,10 @@ frontend/graph.json
 # Logs
 logs/
 
+# Internal working docs (session hygiene, CLAUDE.md working agreement) — not for public repo
+devlog.md
+music-project.md
+
 # Python
 .venv/
 __pycache__/
