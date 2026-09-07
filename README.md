@@ -1,6 +1,9 @@
 # What is this project
 This is a way to visualize how similar different albums are based off tags that users have put on them. Somewhat inspired by Obsidian's node-graph thing.
 
+# Images
+![Music graph, kNN mode, colored by community](images/music_graph_image_1.png)
+
 # Data Used
 Through Last.fm API, I got album level tags such as genre tags, and also album metadata. 
 
